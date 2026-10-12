@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillBridge AI | Bridge Your Skills to Your Dream Job</title>
+    <meta name="description" content="Identify skill gaps between your current experience and your dream job description. Get instant match scores, missing skill breakdowns, and a step-by-step personalized learning roadmap.">
+    
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for modern icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Background Ambient Glows -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+    <div class="ambient-glow glow-3"></div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="brand-logo" id="brandLogo">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-title">SkillBridge <span class="gradient-text">AI</span></span>
+                    <span class="logo-badge">Smart Career Navigator</span>
+                </div>
+            </a>
+
+            <nav class="nav-links">
+                <a href="#analyzer-section" class="nav-link active"><i class="fa-solid fa-chart-pie"></i> Analyzer</a>
+                <a href="#presets-section" class="nav-link"><i class="fa-solid fa-bolt"></i> Sample Roles</a>
+                <a href="#how-it-works" class="nav-link"><i class="fa-solid fa-circle-info"></i> How it Works</a>
+                <a href="#faq-section" class="nav-link"><i class="fa-solid fa-question"></i> Guide</a>
+            </nav>
+
+            <div class="nav-actions">
+                <span class="status-pill"><i class="fa-solid fa-circle status-dot"></i> Works Offline / Zero API Key</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container hero-container">
+            <div class="hero-badge">
+                <i class="fa-solid fa-sparkles"></i> AI-Powered Career Readiness & Skill Gap Analyzer
+            </div>
+            <h1 class="hero-title">
+                Bridge the Gap Between <span class="gradient-text">Your Current Skills</span> and Your Dream Job.
+            </h1>
+            <p class="hero-subtitle">
+                Paste any job description and your existing skills. Instantly discover your percentage match, 
+                pinpoint critical missing technologies, and generate a customized step-by-step roadmap to land the role.
+            </p>
+
+            <!-- Quick Metrics Highlights -->
+            <div class="hero-metrics">
+                <div class="metric-card">
+                    <span class="metric-num">100%</span>
+                    <span class="metric-label">Free & Instant</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-card">
+                    <span class="metric-num">150+</span>
+                    <span class="metric-label">Skills & Frameworks</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric-card">
+                    <span class="metric-num">4-Phase</span>
+                    <span class="metric-label">Learning Roadmaps</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Workspace / Analyzer Section -->
+    <main class="main-workspace" id="analyzer-section">
+        <div class="container">
+            <!-- Sample Roles Quick Bar -->
+            <div class="preset-bar-wrapper" id="presets-section">
+                <div class="preset-bar-header">
+                    <span class="preset-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <span class="preset-title">Quick Try: Load a Popular Job Role</span>
+                    <span class="preset-hint">(Click any role to auto-populate job requirements & sample skills)</span>
+                </div>
+                <div class="preset-tags" id="presetButtons">
+                    {% for role in sample_roles %}
+                    <button type="button" class="preset-btn" data-role-id="{{ role.id }}" id="roleBtn-{{ role.id }}">
+                        <i class="fa-solid fa-briefcase"></i> {{ role.title }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Two-Column Interactive Inputs -->
+            <div class="analyzer-grid">
+                <!-- Column 1: Current Skills Input -->
+                <div class="card input-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-icon icon-emerald"><i class="fa-solid fa-user-check"></i></span>
+                            <div>
+                                <h2 class="card-title">1. Your Current Skills</h2>
+                                <p class="card-subtitle">Add technologies, frameworks, and tools you know</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-text" id="clearSkillsBtn" title="Clear all skills">
+                            <i class="fa-solid fa-trash-can"></i> Clear All
+                        </button>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Custom Interactive Chip Input -->
+                        <div class="skill-input-container" id="skillTagContainer">
+                            <div class="tags-wrapper" id="tagsWrapper">
+                                <!-- Dynamic tags will be rendered here -->
+                            </div>
+                            <input 
+                                type="text" 
+                                id="skillInput" 
+                                class="chip-input-field" 
+                                placeholder="Type a skill and press Enter (e.g. Python, React, SQL)..."
+                                autocomplete="off"
+                            >
+                        </div>
+
+                        <div class="input-helper">
+                            <span><i class="fa-solid fa-keyboard"></i> Press <kbd>Enter</kbd> or type a comma to add a skill</span>
+                            <span id="skillCounter" class="skill-counter">0 skills added</span>
+                        </div>
+
+                        <!-- Quick Add Popular Skill Pills -->
+                        <div class="quick-skills-section">
+                            <label class="quick-skills-label">Click to quick-add common skills:</label>
+                            <div class="quick-skills-pills" id="popularSkillsPills">
+                                {% for skill in popular_skills %}
+                                <button type="button" class="pill-btn" data-skill="{{ skill }}">
+                                    + {{ skill }}
+                                </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Job Description Input -->
+                <div class="card input-card">
+                    <div class="card-header">
+                        <div class="card-title-group">
+                            <span class="card-icon icon-indigo"><i class="fa-solid fa-file-invoice"></i></span>
+                            <div>
+                                <h2 class="card-title">2. Target Job Description</h2>
+                                <p class="card-subtitle">Paste any job post, role requirements, or specifications</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-text" id="clearJdBtn" title="Clear job description">
+                            <i class="fa-solid fa-eraser"></i> Clear
+                        </button>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="textarea-wrapper">
+                            <textarea 
+                                id="jobDescriptionInput" 
+                                class="custom-textarea" 
+                                rows="8" 
+                                placeholder="Paste the job description here... (e.g. We are looking for a developer with experience in React, TypeScript, Node.js, Docker, and PostgreSQL...)"
+                            ></textarea>
+                            <div class="textarea-footer">
+                                <span id="charCounter" class="char-counter">0 characters</span>
+                                <button type="button" class="sample-fill-btn" id="sampleFillBtn">
+                                    <i class="fa-solid fa-paste"></i> Fill Sample JD
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="jd-tips">
+                            <i class="fa-solid fa-lightbulb tip-icon"></i>
+                            <span><strong>Pro-Tip:</strong> You can paste real job descriptions from LinkedIn, Indeed, or Glassdoor!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Central Action Bar -->
+            <div class="action-bar">
+                <button type="button" id="analyzeBtn" class="btn-primary analyze-cta">
+                    <span class="btn-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <span class="btn-text-main">Analyze Skills & Generate Roadmap</span>
+                </button>
+                <button type="button" id="resetBtn" class="btn-secondary">
+                    <i class="fa-solid fa-rotate-left"></i> Reset All
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" id="loadingState" style="display: none;">
+                <div class="spinner"></div>
+                <p class="loading-title">Analyzing Skill Matrices & Aligning Pathways...</p>
+                <p class="loading-subtitle">Comparing proficiencies, calculating gap scores, and building customized roadmap milestones</p>
+            </div>
+
+            <!-- Alert Box for Validation -->
+            <div class="alert-box" id="alertBox" style="display: none;">
+                <i class="fa-solid fa-circle-exclamation alert-icon"></i>
+                <span id="alertMessage">Please provide both your skills and a job description.</span>
+            </div>
+
+            <!-- Analysis Results Section (Populated dynamically) -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <!-- Result Section Header -->
+                <div class="results-banner">
+                    <div class="banner-left">
+                        <div class="score-circle-wrapper">
+                            <svg class="progress-ring" width="140" height="140">
+                                <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.08)" stroke-width="12" cx="70" cy="70" r="54" fill="transparent" />
+                                <circle id="scoreProgressCircle" class="progress-ring-circle" stroke="url(#scoreGradient)" stroke-width="12" stroke-linecap="round" cx="70" cy="70" r="54" fill="transparent" stroke-dasharray="339.29" stroke-dashoffset="339.29" />
+                                <defs>
+                                    <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#6366f1" />
+                                        <stop offset="50%" stop-color="#8b5cf6" />
+                                        <stop offset="100%" stop-color="#10b981" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="score-center-text">
+                                <span class="score-value" id="scoreValue">0%</span>
+                                <span class="score-label">MATCH</span>
+                            </div>
+                        </div>
+
+                        <div class="banner-info">
+                            <div class="badge-wrapper">
+                                <span class="readiness-badge" id="readinessBadge">Job Readiness Assessment</span>
+                            </div>
+                            <h3 class="banner-title" id="readinessTitle">Skill Analysis Complete</h3>
+                            <p class="banner-desc" id="readinessDesc">
+                                Here is the detailed breakdown of how your current skillset aligns with this job posting.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="banner-actions">
+                        <button type="button" class="btn-outline" id="printRoadmapBtn">
+                            <i class="fa-solid fa-print"></i> Print / Save Roadmap
+                        </button>
+                        <button type="button" class="btn-outline" id="copySummaryBtn">
+                            <i class="fa-solid fa-copy"></i> Copy Summary
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 4 KPI Summary Metric Cards -->
+                <div class="summary-metrics-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-indigo"><i class="fa-solid fa-percent"></i></div>
+                        <div class="kpi-content">
+                            <span class="kpi-value" id="kpiMatchScore">0%</span>
+                            <span class="kpi-label">Skill Match Score</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-emerald"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="kpi-content">
+                            <span class="kpi-value" id="kpiMatchedCount">0</span>
+                            <span class="kpi-label">Matching Skills</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-rose"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="kpi-content">
+                            <span class="kpi-value" id="kpiMissingCount">0</span>
+                            <span class="kpi-label">Skills to Learn (Gaps)</span>
+                        </div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-icon icon-amber"><i class="fa-solid fa-clock"></i></div>
+                        <div class="kpi-content">
+                            <span class="kpi-value kpi-small" id="kpiEstTime">-- weeks</span>
+                            <span class="kpi-label">Estimated Roadmap Duration</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Side-by-Side Skills Breakdown: Matched vs Missing vs Bonus -->
+                <div class="skills-breakdown-grid">
+                    <!-- Column A: Matching Skills -->
+                    <div class="card breakdown-card card-matched">
+                        <div class="breakdown-header">
+                            <div class="breakdown-title-group">
+                                <span class="breakdown-badge badge-matched"><i class="fa-solid fa-check"></i> Matched</span>
+                                <h4>Skills You Already Have</h4>
+                            </div>
+                            <span class="count-tag count-matched" id="matchedCountTag">0 skills</span>
+                        </div>
+                        <p class="breakdown-sub">You satisfy these requirements in the job description.</p>
+                        <div class="skills-chips-list" id="matchedSkillsList">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Column B: Missing Skills -->
+                    <div class="card breakdown-card card-missing">
+                        <div class="breakdown-header">
+                            <div class="breakdown-title-group">
+                                <span class="breakdown-badge badge-missing"><i class="fa-solid fa-circle-xmark"></i> Missing</span>
+                                <h4>Skills You Need to Learn</h4>
+                            </div>
+                            <span class="count-tag count-missing" id="missingCountTag">0 skills</span>
+                        </div>
+                        <p class="breakdown-sub">Crucial technologies needed to be 100% qualified for this role.</p>
+                        <div class="skills-chips-list" id="missingSkillsList">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Column C: Bonus Skills (User's extra advantages) -->
+                    <div class="card breakdown-card card-bonus">
+                        <div class="breakdown-header">
+                            <div class="breakdown-title-group">
+                                <span class="breakdown-badge badge-bonus"><i class="fa-solid fa-star"></i> Bonus</span>
+                                <h4>Your Additional Strengths</h4>
+                            </div>
+                            <span class="count-tag count-bonus" id="bonusCountTag">0 skills</span>
+                        </div>
+                        <p class="breakdown-sub">Skills you possess that provide a competitive edge beyond the job posting.</p>
+                        <div class="skills-chips-list" id="bonusSkillsList">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prioritized Skills Recommendation Cards -->
+                <div class="recommendations-section">
+                    <div class="section-title-wrapper">
+                        <h3 class="section-title"><i class="fa-solid fa-arrow-trend-up"></i> Priority Skills to Learn</h3>
+                        <p class="section-subtitle">Ranked by industry importance and impact on hiring decisions</p>
+                    </div>
+
+                    <div class="recommendation-cards-grid" id="recommendationCardsGrid">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Step-by-Step Personalized Learning Roadmap -->
+                <div class="roadmap-section" id="roadmapContainer">
+                    <div class="roadmap-header">
+                        <div class="roadmap-title-group">
+                            <span class="roadmap-tag"><i class="fa-solid fa-map"></i> Structured Pathway</span>
+                            <h3 class="roadmap-title">Your Step-by-Step Learning Roadmap</h3>
+                            <p class="roadmap-subtitle">
+                                Follow this phased blueprint to efficiently conquer missing skills, build portfolio projects, and get hired.
+                            </p>
+                        </div>
+                        <div class="roadmap-badge-time" id="roadmapTimeBadge">
+                            <i class="fa-regular fa-calendar-check"></i> <span id="roadmapDurationText">4 - 8 Weeks</span>
+                        </div>
+                    </div>
+
+                    <!-- Roadmap Timeline Sequence -->
+                    <div class="roadmap-timeline" id="roadmapTimeline">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works Section -->
+            <section class="how-it-works-section" id="how-it-works">
+                <div class="section-header-center">
+                    <span class="pill-tag">Simple & Effective</span>
+                    <h2 class="section-heading">How SkillBridge AI Works</h2>
+                    <p class="section-desc">Turn vague job descriptions into an actionable, tailored upskilling curriculum in seconds.</p>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">01</div>
+                        <div class="step-icon"><i class="fa-solid fa-terminal"></i></div>
+                        <h4 class="step-title">Enter Your Skills</h4>
+                        <p class="step-text">Type your languages, frameworks, databases, and tools, or click popular suggestion tags.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-number">02</div>
+                        <div class="step-icon"><i class="fa-solid fa-file-contract"></i></div>
+                        <h4 class="step-title">Paste Job Description</h4>
+                        <p class="step-text">Paste requirements from any job listing or choose from our pre-curated industry roles.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-number">03</div>
+                        <div class="step-icon"><i class="fa-solid fa-chart-simple"></i></div>
+                        <h4 class="step-title">Instant Gap Analysis</h4>
+                        <p class="step-text">Get an accurate match score percentage and visual breakdown of matched vs missing skills.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-number">04</div>
+                        <div class="step-icon"><i class="fa-solid fa-road"></i></div>
+                        <h4 class="step-title">Execute Your Roadmap</h4>
+                        <p class="step-text">Follow a phase-by-phase learning plan with free curated tutorials, project ideas, and timelines.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ & Job Seeker Tips -->
+            <section class="faq-section" id="faq-section">
+                <div class="section-header-center">
+                    <span class="pill-tag">Career Guidance</span>
+                    <h2 class="section-heading">Frequently Asked Questions</h2>
+                </div>
+
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <h5 class="faq-question"><i class="fa-solid fa-circle-question"></i> What is a good skill match score?</h5>
+                        <p class="faq-answer">
+                            A match score of <strong>70% or higher</strong> is considered very strong for applying. Employers rarely expect a candidate to meet 100% of listed requirements. Even at 50-60%, highlighting your strong foundational learning ability makes you competitive!
+                        </p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h5 class="faq-question"><i class="fa-solid fa-circle-question"></i> How should I use the generated roadmap?</h5>
+                        <p class="faq-answer">
+                            Focus on one phase at a time. Rather than just reading tutorials, build the suggested <strong>hands-on mini-projects</strong>. Having tangible code on GitHub is the single fastest way to prove skill competence to recruiters.
+                        </p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h5 class="faq-question"><i class="fa-solid fa-circle-question"></i> Does SkillBridge AI work without an internet connection?</h5>
+                        <p class="faq-answer">
+                            Yes! SkillBridge AI includes an internal taxonomy of over 150+ tech skills, frameworks, and job roles. It analyzes requirements completely locally without requiring costly API keys or external dependencies.
+                        </p>
+                    </div>
+
+                    <div class="faq-item">
+                        <h5 class="faq-question"><i class="fa-solid fa-circle-question"></i> Can I add custom or non-technical skills?</h5>
+                        <p class="faq-answer">
+                            Absolutely. You can type any skill into the input box (e.g., Agile, Jira, Technical Writing, Leadership) and press Enter. The analyzer will categorize and cross-reference them accordingly.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <div class="container footer-container">
+            <div class="footer-brand">
+                <div class="logo-icon small"><i class="fa-solid fa-graduation-cap"></i></div>
+                <span class="footer-title">SkillBridge AI</span>
+                <span class="footer-tagline">&copy; 2026 SkillBridge AI &bull; Built with Flask, Python & Modern Web Technologies</span>
+            </div>
+
+            <div class="footer-links">
+                <span class="stack-badge"><i class="fa-brands fa-python"></i> Python 3</span>
+                <span class="stack-badge"><i class="fa-solid fa-server"></i> Flask</span>
+                <span class="stack-badge"><i class="fa-brands fa-html5"></i> HTML5</span>
+                <span class="stack-badge"><i class="fa-brands fa-css3-alt"></i> CSS3</span>
+                <span class="stack-badge"><i class="fa-brands fa-js"></i> JavaScript</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Pass backend sample roles to JavaScript safely -->
+    <script>
+        window.INITIAL_SAMPLE_ROLES = {{ sample_roles | tojson | safe }};
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
